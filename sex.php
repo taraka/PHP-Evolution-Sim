@@ -11,12 +11,25 @@ class Organism
 		$_genes,
 		$_fitness;
 
-	public function __construct($genes)
+	public function __construct($genes=null)
 	{
-		$this->_genes = $genes;
+		$this->_genes = isset($genes) ? $genes : $this->getRandomGenes();
 		$this->calculateFitness();
 	}
 
+	private function getRandomGenes()
+	{
+		static $possibleGenes;
+		if (!isset($possibleGenes)){
+			$possibleGenes = array_merge(range('A', 'Z'), array(' '));
+		}
+		
+		for ($i = 0; $i < strLen(TARGET); $i++)
+		{
+			$population[$i] .= $possibleGenes[array_rand($possibleGenes)];
+		}
+	}
+	
 	private function calculateFitness()
 	{
 		$this->_fitness = levenshtein($this->_genes, TARGET);
@@ -43,12 +56,17 @@ class Organism
 	}
 }
 
-function randomGene(){
-  static $possibleGenes;
-  if (!isset($possibleGenes)){
-    $possibleGenes = array_merge(range('A', 'Z'), array(' '));
-  }
-  return $possibleGenes[array_rand($possibleGenes)];
+class Population
+{
+	private
+		$_population = array();
+		
+	public function __construct($size)
+	{
+		for ($i = 0; $i < $size; $i++) {
+			$this->_population[] = new Organism();
+		}
+	}
 }
 
 function removeFittest(&$population){
@@ -90,15 +108,6 @@ function sex($female, $male, $mutationChance){
     $child .= $gene;
   }
   return $child;
-}
-
-// The initial population
-$population = array();
-for ($i = 0; $i < POPULATION_SIZE; $i++){
-  $population[$i] = '';
-  for ($j = 0; $j < strLen(TARGET); $j++){
-    $population[$i] .= randomGene();
-  }
 }
 
 $generation = 0;

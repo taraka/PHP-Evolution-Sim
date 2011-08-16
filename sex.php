@@ -2,10 +2,45 @@
 define('TARGET', 'METHINKS IT IS LIKE A WEASEL');
 define('MUTATION_CHANCE', 0.04);
 define('POPULATION_SIZE', 10);
+define('MAX_AGE', 3);
 
-// The lower, the better!
-function fitness($organism, $target){
-  return levenshtein($organism, $target);
+class Organism
+{
+	private
+		$_age = 0,
+		$_genes,
+		$_fitness;
+
+	public function __construct($genes)
+	{
+		$this->_genes = $genes;
+		$this->calculateFitness();
+	}
+
+	private function calculateFitness()
+	{
+		$this->_fitness = levenshtein($this->_genes, TARGET);
+	}
+	
+	public function getFitness()
+	{
+		return $this->_fitness;
+	}
+	
+	public function getGenes()
+	{
+		return $this->_genes;
+	}
+	
+	public function getAge()
+	{
+		return $this->_age;
+	}
+	
+	public function incrementAge()
+	{
+		$this->_age++;
+	}
 }
 
 function randomGene(){

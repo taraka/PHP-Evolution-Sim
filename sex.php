@@ -1,6 +1,6 @@
 <?php
 define('TARGET', 'METHINKS IT IS LIKE A WEASEL');
-define('MUTATION_CHANCE', 0.01);
+define('MUTATION_CHANCE', 0.04);
 define('POPULATION_SIZE', 20);
 define('MAX_AGE', 3);
 define('NUM_TO_KILL', 7);

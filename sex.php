@@ -1,9 +1,10 @@
 <?php
-define('TARGET', 'METHINKS IT IS LIKE A WEASEL');
-define('MUTATION_CHANCE', 0.04);
-define('POPULATION_SIZE', 20);
+define('TARGET', 'What\'s in a name? That which we call a rose by any other name would smell as sweet.');
+define('MUTATION_CHANCE', 0.1);
+define('DOMINANCE_CHANCE', 0.7);
+define('POPULATION_SIZE', 50);
 define('MAX_AGE', 3);
-define('NUM_TO_KILL', 7);
+define('NUM_TO_KILL', 40);
 
 class Organism
 {
@@ -11,7 +12,7 @@ class Organism
 		$_age = 0,
 		$_genes,
 		$_fitness;
-
+		
 	public function __construct($genes=null)
 	{
 		$this->_genes = isset($genes) ? $genes : $this->getRandomGenes();
@@ -32,7 +33,7 @@ class Organism
 	{
 		static $possibleGenes;
 		if (!isset($possibleGenes)){
-			$possibleGenes = array_merge(range('A', 'Z'), array(' '));
+			$possibleGenes = array_merge(range('A', 'Z'), array(' ', '\'', '?', '.'), range('a', 'z'));
 		}
 		
 		return $possibleGenes[array_rand($possibleGenes)];
@@ -82,18 +83,26 @@ class Organism
 	{
 		$child  = '';
 		$length = strLen(TARGET);
+		$target = str_split(TARGET);
 		$female = str_split($mate->getGenes());
 		$male   = str_split($this->getGenes());
 		$mutationChance = intval(1/MUTATION_CHANCE);
-
+		$dominanceChance = intval(1/DOMINANCE_CHANCE);
+		
 		for ($i = 0; $i < $length; $i++)
 		{
-			if (rand(0,$mutationChance) == 0){
-				$gene = $this->randomGene();
-			} else if(rand(0, 10) < 6) {
+			if ($male[$i] == $target[$i] && rand(0,$dominanceChance) == 0) {
 				$gene = $male[$i];
-			} else {
-				$gene = $female[$i];
+			}
+			else
+			{
+				if (rand(0,$mutationChance) == 0){
+					$gene = $this->randomGene();
+				} else if(rand(0, 10) < 6) {
+					$gene = $male[$i];
+				} else {
+					$gene = $female[$i];
+				}
 			}
 			$child .= $gene;
 		}
@@ -181,19 +190,21 @@ $generation = 0;
 
 
 do {
-  $generation++;
-  list($male, $female) = $population->getFittest();
+	$generation++;
+	list($male, $female) = $population->getFittest();
 
-  $population->cull();
-  $population->growPopulation();
-  $population->age();
+	$population->cull();
+	$population->growPopulation();
+	$population->age();
   
-  if (!($generation % 10)){
-    echo "\nGeneration {$generation}\n";
-    echo "Elite male:   {$male->getGenes()}\n";
-    echo "Elite female: {$female->getGenes()}\n";
-    echo "Population Size: {$population->getPopulationCount()}\n";
-  }
+	if (!($generation % 10))
+  	{
+  		$fittnesPercent = number_format(((strLen(TARGET) - $male->getFitness()) / strLen(TARGET)) * 100, 2);
+		echo "\nGeneration {$generation}\n";
+		echo "Elite male:   {$male->getGenes()}\n";
+		echo "Elite female: {$female->getGenes()}\n";
+		echo "Male Fitness: {$fittnesPercent}%\n";
+	}
 } while($male->getFitness());
 
 echo "\nMet target at generation {$generation} with:\n";

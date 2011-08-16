@@ -1,9 +1,9 @@
 <?php
 define('TARGET', 'METHINKS IT IS LIKE A WEASEL');
-define('MUTATION_CHANCE', 0.02);
-define('POPULATION_SIZE', 50);
+define('MUTATION_CHANCE', 0.01);
+define('POPULATION_SIZE', 20);
 define('MAX_AGE', 3);
-define('NUM_TO_KILL', 6);
+define('NUM_TO_KILL', 7);
 
 class Organism
 {
@@ -40,7 +40,22 @@ class Organism
 	
 	private function calculateFitness()
 	{
-		$this->_fitness = levenshtein($this->_genes, TARGET);
+		static $target;
+		
+		if (!isset($target)) {
+			$target = str_split(TARGET);
+		}
+		
+		$genes = str_split($this->getGenes());
+		$distance = 0;
+		
+		for ($i = 0; $i < strLen(TARGET); $i++) {
+			if ($target[$i] != $genes[$i]) {
+				$distance++;
+			}
+		}
+		
+		$this->_fitness = $distance;
 	}
 	
 	public function getFitness()
